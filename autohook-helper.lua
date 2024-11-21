@@ -29,7 +29,7 @@ function main()
                 spiritbonding()
             end
         else
-            if IsPlayerAvailable() and not GetCharacterCondition(43) and not GetCharacterCondition(6) then
+            if GetCharacterCondition(6) and not GetCharacterCondition(43) then
                 yield("/ac Cast")
             end
             yield("/wait "..check_rate)
