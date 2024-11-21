@@ -9,6 +9,7 @@ interval_move = 10          -- Minutes to wait between each movement
 stop_main = false
 
 -- Move stuff
+should_move = false
 move_timer = interval_move * 60
 move_direction = true
 fishing_start_time = os.time()
@@ -27,6 +28,9 @@ function main()
                 yield("/wait 1")
             end
             if should_move then
+				print(fishing_start_time)
+				print(fishing_start_time + move_timer)
+				print(os.time())
                 moveAside()
                 should_move = false
             end
@@ -131,7 +135,10 @@ function repair()
 end
 
 function print(message)
-    yield("/echo [Autohook-Helper] "..message)
+    if type(message) ~= "string" then
+        message = tostring(message)
+    end
+    yield("/echo [Autohook-Helper] " .. message)
 end
 
 function CanCharacterDoActions()
@@ -143,9 +150,9 @@ function moveAside()
     currentY = tonumber(GetPlayerRawYPos())
     currentZ = tonumber(GetPlayerRawZPos())
     if move_direction then
-        currentX = currentX + 1
+        currentZ = currentZ + 1
     else
-        currentX = currentX - 1
+        currentZ = currentZ - 1
     end
     move_direction = not move_direction
     PathfindAndMoveTo(currentX, currentY, currentZ, false)
@@ -156,7 +163,7 @@ function moveAside()
 end
 
 function needToMove()
-    if fishing_start_time + move_timer > os.time() then
+    if os.time() >= fishing_start_time + move_timer then
         should_move = true
         return true
     else
