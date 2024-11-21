@@ -139,9 +139,9 @@ function CanCharacterDoActions()
 end
 
 function moveAside()
-    currentX = GetPlayerRawXPos
-    currentY = GetPlayerRawYPos
-    currentZ = GetPlayerRawZPos
+    currentX = tonumber(GetPlayerRawXPos())
+    currentY = tonumber(GetPlayerRawYPos())
+    currentZ = tonumber(GetPlayerRawZPos())
     if move_direction then
         currentX = currentX + 1
     else
