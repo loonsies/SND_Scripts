@@ -2,7 +2,7 @@
 
 do_spiritbonding = true     -- Auto spiritbonding
 do_repair = true            -- Auto repair
-repair_threshold = 99       -- Minimum % before repairing gear
+repair_threshold = 30       -- Minimum % before repairing gear
 check_rate = 5              -- Seconds to wait between each check
 interval_rate = 0.2         -- Seconds to wait between each action
 interval_move = 10          -- Minutes to wait between each movement
@@ -143,11 +143,11 @@ function moveAside()
     currentY = GetPlayerRawYPos
     currentZ = GetPlayerRawZPos
     if move_direction then
-        currentX += 1
+        currentX = currentX + 1
     else
-        currentX -= 1
+        currentX = currentX - 1
     end
-    move_direction != move_direction
+    move_direction = not move_direction
     PathfindAndMoveTo(X, Y, Z, false)
     while (PathIsRunning() or IsMoving()) then
         yield("/wait 1")
