@@ -149,7 +149,7 @@ function moveAside()
     end
     move_direction = not move_direction
     PathfindAndMoveTo(X, Y, Z, false)
-    while (PathIsRunning() or IsMoving()) then
+    while (PathIsRunning() or IsMoving()) do
         yield("/wait 1")
     end
     fishing_start_time = os.time()
