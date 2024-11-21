@@ -148,7 +148,7 @@ function moveAside()
         currentX = currentX - 1
     end
     move_direction = not move_direction
-    PathfindAndMoveTo(X, Y, Z, false)
+    PathfindAndMoveTo(currentX, currentY, currentZ, false)
     while (PathIsRunning() or IsMoving()) do
         yield("/wait 1")
     end
