@@ -5,7 +5,13 @@ do_repair = true            -- Auto repair
 repair_threshold = 99       -- Minimum % before repairing gear
 check_rate = 5              -- Seconds to wait between each check
 interval_rate = 0.2         -- Seconds to wait between each action
+interval_move = 10          -- Minutes to wait between each movement
 stop_main = false
+
+-- Move stuff
+move_timer = interval_move * 60
+move_direction = true
+fishing_start_time = os.time()
 
 -- Functions
 
@@ -17,8 +23,12 @@ function main()
                 yield("/wait "..interval_rate)
             end
             while GetCharacterCondition(6) do
-                yield("/ac Quit")
+                yield("/ac Abandon")
                 yield("/wait 1")
+            end
+            if should_move then
+                moveAside()
+                should_move = false
             end
             if do_repair and isRepairNeeded() then
                 print("Attempting to perform self-repair...")
@@ -29,8 +39,9 @@ function main()
                 spiritbonding()
             end
         else
-            if GetCharacterCondition(6) and not GetCharacterCondition(43) then
-                yield("/ac Cast")
+            if (GetCharacterCondition(6) and not GetCharacterCondition(43)) or GetCharacterCondition(1) then
+                yield("/ac Pêche")
+                fishing_start_time = os.time()
             end
             yield("/wait "..check_rate)
         end
@@ -40,6 +51,7 @@ end
 function isPauseNeeded()
     return (do_repair and isRepairNeeded())
         or (do_spiritbonding and CanExtractMateria())
+        or (needToMove())
 end
 
 function isRepairNeeded()
@@ -55,7 +67,7 @@ end
 
 function spiritbonding()
     while CanCharacterDoActions() and not IsAddonVisible("Materialize") and not IsAddonReady("Materialize") do
-        yield('/gaction "Materia Extraction"')
+        yield('/gaction "Matérialisation"')
         repeat
             yield("/wait "..interval_rate)
         until IsPlayerAvailable()
@@ -70,7 +82,7 @@ function spiritbonding()
         until not GetCharacterCondition(39)
     end
     while CanCharacterDoActions() and IsAddonVisible("Materialize") do
-        yield('/gaction "Materia Extraction"')
+        yield('/gaction "Matérialisation"')
         repeat
             yield("/wait "..interval_rate)
         until IsPlayerAvailable()
@@ -87,8 +99,8 @@ end
 
 function repair()
     while CanCharacterDoActions() and not IsAddonVisible("Repair") and not IsAddonReady("Repair") do
-        yield('/gaction "Repair"')
-        repeat				
+        yield('/gaction "Réparation"')
+        repeat
             if not CanCharacterDoActions() then return end
             yield("/wait "..interval_rate)
         until IsPlayerAvailable()
@@ -104,7 +116,7 @@ function repair()
     until not IsAddonVisible("SelectYesno")
     while GetCharacterCondition(39) do yield("/wait "..interval_rate) end
     while IsAddonVisible("Repair") do
-        yield('/gaction "Repair"')
+        yield('/gaction "Réparation"')
         repeat
             yield("/wait "..interval_rate)
         until IsPlayerAvailable()
@@ -124,6 +136,32 @@ end
 
 function CanCharacterDoActions()
     return not (GetCharacterCondition(6) or GetCharacterCondition(32) or GetCharacterCondition(45) or GetCharacterCondition(27) or GetCharacterCondition(4))
+end
+
+function moveAside()
+    currentX = GetPlayerRawXPos
+    currentY = GetPlayerRawYPos
+    currentZ = GetPlayerRawZPos
+    if move_direction then
+        currentX += 1
+    else
+        currentX -= 1
+    end
+    move_direction != move_direction
+    PathfindAndMoveTo(X, Y, Z, false)
+    while (PathIsRunning() or IsMoving()) then
+        yield("/wait 1")
+    end
+    fishing_start_time = os.time()
+end
+
+function needToMove()
+    if fishing_start_time + move_timer > os.time() then
+        should_move = true
+        return true
+    else
+        return false
+    end
 end
 
 main()
