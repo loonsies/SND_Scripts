@@ -51,6 +51,11 @@ function main()
 				yield("/wait 2")
 				if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
                 	yield("/ac Pêche")
+					yield("/wait" .. interval_rate)
+					if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
+						print("Couldn't start fishing. Are you fisher and at a fishing spot?")
+						yield("/snd stop")
+					end
 				end
             end
             yield("/wait "..check_rate)
