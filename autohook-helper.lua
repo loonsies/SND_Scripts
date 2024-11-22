@@ -2,16 +2,23 @@
 
 do_spiritbonding = true     -- Auto spiritbonding
 do_repair = true            -- Auto repair
+do_move = false				-- Move between fishing spots
 repair_threshold = 30       -- Minimum % before repairing gear
 check_rate = 5              -- Seconds to wait between each check
 interval_rate = 0.2         -- Seconds to wait between each action
-interval_move = 10          -- Minutes to wait between each movement
+interval_move = 5         -- Minutes to wait between each movement
 stop_main = false
+
+-- Fishing spots positions to move between
+prespot1 = {X = 82.919479370117, Y = -0.11453104019165, Z = 729.27093505859}
+spot1 = {X = 84.316375732422, Y = -0.87232160568237, Z = 732.39526367188}
+prespot2 = {X = 73.940093994141, Y = -0.81094461679459, Z = 734.09552001953}
+spot2 = {X = 75.55126953125, Y = -1.5100334882736, Z = 737.56164550781}
 
 -- Move stuff
 should_move = false
 move_timer = interval_move * 60
-move_direction = true
+move_direction = false
 fishing_start_time = os.time()
 
 -- Functions
@@ -28,9 +35,6 @@ function main()
                 yield("/wait 1")
             end
             if should_move then
-				print(fishing_start_time)
-				print(fishing_start_time + move_timer)
-				print(os.time())
                 moveAside()
                 should_move = false
             end
@@ -44,8 +48,10 @@ function main()
             end
         else
             if (GetCharacterCondition(6) and not GetCharacterCondition(43)) or GetCharacterCondition(1) then
-                yield("/ac Pêche")
-                fishing_start_time = os.time()
+				yield("/wait 2")
+				if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
+                	yield("/ac Pêche")
+				end
             end
             yield("/wait "..check_rate)
         end
@@ -146,29 +152,38 @@ function CanCharacterDoActions()
 end
 
 function moveAside()
-    currentX = tonumber(GetPlayerRawXPos())
-    currentY = tonumber(GetPlayerRawYPos())
-    currentZ = tonumber(GetPlayerRawZPos())
+	print("Moving...")
     if move_direction then
-        currentZ = currentZ + 1
+		targetPos = spot1
+		targetPrePos = prespot1
     else
-        currentZ = currentZ - 1
+		targetPos = spot2
+		targetPrePos = prespot2
     end
     move_direction = not move_direction
-    PathfindAndMoveTo(currentX, currentY, currentZ, false)
-    while (PathIsRunning() or IsMoving()) do
-        yield("/wait 1")
-    end
+    PathfindAndMoveTo(targetPrePos.X, targetPrePos.Y, targetPrePos.Z, false)
+    VNavMovement()
+	PathfindAndMoveTo(targetPos.X, targetPos.Y, targetPos.Z, false)
+	VNavMovement()
     fishing_start_time = os.time()
 end
 
 function needToMove()
+	if not do_move then return false end
     if os.time() >= fishing_start_time + move_timer then
+		print("Move timer reached")
         should_move = true
         return true
     else
         return false
     end
 end
+
+function VNavMovement()
+    repeat
+      yield("/wait 0.1")
+    until not PathIsRunning()
+    yield("/wait 0.5")
+  end
 
 main()
