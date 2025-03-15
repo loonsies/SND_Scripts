@@ -47,18 +47,15 @@ if IsInZone(886) then
             yield("/pinteract")
         end
         if IsAddonVisible("Talk") then
-            yield("/echo trying to talk")
-/xl
+            yield("/click Talk Click")
         end
         if IsAddonVisible("SelectString") then
-            yield("/echo trying to select string")
             yield("/pcall SelectString true 0")
         end
         if IsAddonVisible("SelectYesno") then
-            yield("/echo trying to select yesno")
             yield("/pcall SelectYesno true 0")
         end
-        yield("/wait 0.5")
+        yield("/wait 1")
     end
     while GetCharacterCondition(35, false) do
         yield("/wait 1")
@@ -85,7 +82,7 @@ if IsInZone(939) then
     yield("/wait 1")
     yield("/visland movedir 50 0 -50")
     yield("/wait 1")
-    yield("/visland moveto -235 30 -435")
+    yield("/visland moveto -229.99899291992 -2.5091722011566 -446.00067138672")
     yield("/wait 1")
     while IsMoving() do
         yield("/wait 1")
