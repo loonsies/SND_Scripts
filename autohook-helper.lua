@@ -1,8 +1,9 @@
 -- Settings
 
+need_setup = true           -- Auto move to spot and change to "Fisher" gearset
 do_spiritbonding = true     -- Auto spiritbonding
 do_repair = true            -- Auto repair
-do_move = false				-- Move between fishing spots
+do_move = true             -- Move between fishing spots
 repair_threshold = 30       -- Minimum % before repairing gear
 check_rate = 5              -- Seconds to wait between each check
 interval_rate = 0.2         -- Seconds to wait between each action
@@ -11,7 +12,7 @@ stop_main = false
 
 -- Fishing spots positions to move between
 prespot1 = {X = 82.919479370117, Y = -0.11453104019165, Z = 729.27093505859}
-spot1 = {X = 84.316375732422, Y = -0.87232160568237, Z = 732.39526367188}
+spot1 = {X = 84.316375732422, Y = -0.87232160568237, Z = 732.49526367188}
 prespot2 = {X = 73.940093994141, Y = -0.81094461679459, Z = 734.09552001953}
 spot2 = {X = 75.55126953125, Y = -1.5100334882736, Z = 737.56164550781}
 
@@ -23,6 +24,21 @@ fishing_start_time = os.time()
 
 -- Functions
 
+function setup()
+    yield("/gs change Fisher")
+    yield("/ahon")
+    yield("/wait " .. interval_rate)
+    yield("/tp Hhusatahwi")
+    yield("/wait 15")
+    yield('/mount "Company Chocobo"')
+    yield("/wait 1.2")
+    yield("/vnav flyto 82.919479370117 -0.11453104019165 729.27093505859")
+    yield("/wait 25")
+    yield("/mount")
+    yield("/wait " .. interval_rate)
+    yield("/vnav moveto 84.316375732422 -0.87232160568237 732.49526367188")
+end
+
 function main()
     while not stop_main do
         if isPauseNeeded() then
@@ -31,7 +47,7 @@ function main()
                 yield("/wait "..interval_rate)
             end
             while GetCharacterCondition(6) do
-                yield("/ac Abandon")
+                yield("/ac Quit")
                 yield("/wait 1")
             end
             if should_move then
@@ -47,18 +63,19 @@ function main()
                 spiritbonding()
             end
         else
+            yield("/wait " .. interval_rate)
             if (GetCharacterCondition(6) and not GetCharacterCondition(43)) or GetCharacterCondition(1) then
-				yield("/wait 2")
-				if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
-                	yield("/ac Pêche")
-					yield("/wait" .. interval_rate)
-					if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
-						print("Couldn't start fishing. Are you fisher and at a fishing spot?")
-						yield("/snd stop")
-					end
-				end
+                yield("/wait 2")
             end
-            yield("/wait "..check_rate)
+            if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
+                yield("/ac Cast")
+                yield("/wait " .. interval_rate)
+            end
+            if GetCharacterCondition(6) and not GetCharacterCondition(43) or GetCharacterCondition(1) then
+                print("Couldn't start fishing. Are you fisher and at a fishing spot?")
+                yield("/snd stop")
+            end
+            yield("/wait " .. check_rate)
         end
     end
 end
@@ -82,9 +99,9 @@ end
 
 function spiritbonding()
     while CanCharacterDoActions() and not IsAddonVisible("Materialize") and not IsAddonReady("Materialize") do
-        yield('/gaction "Matérialisation"')
+        yield('/gaction "Materia Extraction"')
         repeat
-            yield("/wait "..interval_rate)
+            yield("/wait " .. interval_rate)
         until IsPlayerAvailable()
     end
     while CanCharacterDoActions() and CanExtractMateria() do
@@ -97,9 +114,9 @@ function spiritbonding()
         until not GetCharacterCondition(39)
     end
     while CanCharacterDoActions() and IsAddonVisible("Materialize") do
-        yield('/gaction "Matérialisation"')
+        yield('/gaction "Materia Extraction"')
         repeat
-            yield("/wait "..interval_rate)
+            yield("/wait " .. interval_rate)
         until IsPlayerAvailable()
     end
     if CanExtractMateria() then
@@ -114,26 +131,26 @@ end
 
 function repair()
     while CanCharacterDoActions() and not IsAddonVisible("Repair") and not IsAddonReady("Repair") do
-        yield('/gaction "Réparation"')
+        yield('/gaction "Repair"')
         repeat
             if not CanCharacterDoActions() then return end
-            yield("/wait "..interval_rate)
+            yield("/wait " .. interval_rate)
         until IsPlayerAvailable()
     end
     yield("/wait 0.1")
     yield("/pcall Repair true 0")
     repeat
-        yield("/wait "..interval_rate)
+        yield("/wait " .. interval_rate)
     until IsAddonVisible("SelectYesno") and IsAddonReady("SelectYesno")
     yield("/pcall SelectYesno true 0")
     repeat
-        yield("/wait "..interval_rate)
+        yield("/wait " .. interval_rate)
     until not IsAddonVisible("SelectYesno")
     while GetCharacterCondition(39) do yield("/wait "..interval_rate) end
     while IsAddonVisible("Repair") do
-        yield('/gaction "Réparation"')
+        yield('/gaction "Repair"')
         repeat
-            yield("/wait "..interval_rate)
+            yield("/wait " .. interval_rate)
         until IsPlayerAvailable()
     end
     if NeedsRepair() then
@@ -157,26 +174,26 @@ function CanCharacterDoActions()
 end
 
 function moveAside()
-	print("Moving...")
+print("Moving...")
     if move_direction then
-		targetPos = spot1
-		targetPrePos = prespot1
+targetPos = spot1
+targetPrePos = prespot1
     else
-		targetPos = spot2
-		targetPrePos = prespot2
+targetPos = spot2
+targetPrePos = prespot2
     end
     move_direction = not move_direction
     PathfindAndMoveTo(targetPrePos.X, targetPrePos.Y, targetPrePos.Z, false)
     VNavMovement()
-	PathfindAndMoveTo(targetPos.X, targetPos.Y, targetPos.Z, false)
-	VNavMovement()
+PathfindAndMoveTo(targetPos.X, targetPos.Y, targetPos.Z, false)
+VNavMovement()
     fishing_start_time = os.time()
 end
 
 function needToMove()
-	if not do_move then return false end
+if not do_move then return false end
     if os.time() >= fishing_start_time + move_timer then
-		print("Move timer reached")
+print("Move timer reached")
         should_move = true
         return true
     else
@@ -191,4 +208,8 @@ function VNavMovement()
     yield("/wait 0.5")
   end
 
+if need_setup then
+    setup()
+    yield("/wait " .. interval_rate)
+end
 main()
