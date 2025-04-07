@@ -412,10 +412,7 @@ function Crafting()
         if IsNeedRepair() then
           yield("/echo bip repair")
           ArtisanSetStopRequest(true)
-          while ArtisanGetEnduranceStatus() and not IsPlayerAvailable() do
-            LogInfo("[OrangeCrafters] Waiting for Artisan to finish crafting...")
-            yield("/wait 1")
-          end
+          waitForArtisan()
           RepairExtractReduceCheck()
           ArtisanSetStopRequest(false)
         end
@@ -463,6 +460,13 @@ function Crafting()
     end
 end
 
+function waitForArtisan()
+  while ArtisanGetEnduranceStatus() and not IsPlayerAvailable() do
+    LogInfo("[OrangeCrafters] Waiting for Artisan to finish crafting...")
+    yield("/wait 1")
+  end
+end
+
 function GoToHubCity()
     if not IsPlayerAvailable() then
         yield("/wait 1")
@@ -478,10 +482,7 @@ function TurnIn()
     AtInn = false
     if ArtisanGetEnduranceStatus() then
       ArtisanSetEnduranceStatus(false)
-      while ArtisanGetEnduranceStatus() and not IsPlayerAvailable() do
-        LogInfo("[OrangeCrafters] Waiting for Artisan to finish crafting...")
-        yield("/wait 1")
-      end
+      waitForArtisan()
     end
     if GetItemCount(ItemId) == 0 or GetItemCount(CrafterScripId) >= 3800 then
         if IsAddonVisible("CollectablesShop") then
@@ -677,6 +678,8 @@ function ProcessRetainers()
 end
 
 function ExecuteGrandCompanyTurnIn()
+    ArtisanSetEnduranceStatus(false)
+    waitForArtisan()
     if DeliverooIsTurnInRunning() then
         return
     elseif GetInventoryFreeSlotCount() <= MinInventoryFreeSlots then
