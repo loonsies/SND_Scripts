@@ -64,7 +64,7 @@ Retainers = true
 Retainers_Amount = 4 -- Amount of retainers = potention slots to keep free in inventory before processing retainers, avoids getting stuck waiting for retainers to finish
 GrandCompanyTurnIn = true
 MinInventoryFreeSlots = Retainers_Amount * 2
-Do_Repair = "false" --false, "npc" or "self"
+Do_Repair = false --false, "npc" or "self"
 Repair_Npc_Name = "Loporrit Mender" --Name of the NPC you want to repair with.
 Repair_Threshold = 33
 
@@ -413,9 +413,11 @@ function Crafting()
     local slots = GetInventoryFreeSlotCount()
     if ArtisanGetEnduranceStatus() then
         if IsNeedRepair() then
+            LogInfo("[OrangeCrafters] Setting Artisan stop request to true")
             ArtisanSetStopRequest(true)
             waitForArtisan()
             RepairExtractReduceCheck()
+            LogInfo("[OrangeCrafters] Setting Artisan stop request to false")
             ArtisanSetStopRequest(false)
         end
         return
@@ -809,7 +811,7 @@ function IsNeedRepair()
         if NeedsRepair(tonumber(Repair_Threshold)) then
             if string.find(string.lower(Do_Repair), "self") then
                 return "self"
-            else
+            elseif string.find(string.lower(Do_Repair), "npc") then
                 return "npc"
             end
         else
@@ -1025,6 +1027,7 @@ while not StopFlag do
      then
         if State ~= CharacterState.crafting then
             if ArtisanGetEnduranceStatus() then
+                LogInfo("[OrangeCrafters] Setting Artisan endurance status to false")
                 ArtisanSetEnduranceStatus(false)
                 waitForArtisan()
                 yield("/wait 1")
