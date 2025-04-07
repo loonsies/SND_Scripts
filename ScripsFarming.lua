@@ -443,11 +443,6 @@ function Crafting()
                 LogInfo("[OrangeCrafters] Attempting to craft intermediate materials")
                 yield("/artisan lists " .. ArtisanListId .. " start")
                 ArtisanTimeoutStartTime = os.clock()
-            elseif GetItemCount(ItemId) > 0 then
-                LogInfo("[OrangeCrafters] Turning In")
-                yield("/callback RecipeNote true -1")
-                State = CharacterState.turnIn
-                LogInfo("[OrangeCrafters] State Change: TurnIn")
             elseif os.clock() - ArtisanTimeoutStartTime > 5 then
                 LogInfo("[OrangeCrafters] Artisan not starting, StopFlag = true")
                 -- if artisan has not entered crafting mode within 15s of being called,
@@ -468,6 +463,9 @@ function Crafting()
         ArtisanTimeoutStartTime = 0
         ArtisanCraftItem(RecipeId, slots - MinInventoryFreeSlots)
         yield("/wait 5")
+        if ArtisanGetEnduranceStatus() and CharacterCondition(5) then
+            ArtisanTimeoutStartTime = 0
+        end
     else
         LogInfo("[OrangeCrafters] Else condition hit")
     end
