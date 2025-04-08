@@ -463,7 +463,7 @@ function Crafting()
         ArtisanTimeoutStartTime = 0
         ArtisanCraftItem(RecipeId, slots - MinInventoryFreeSlots)
         yield("/wait 5")
-        if ArtisanGetEnduranceStatus() and CharacterCondition(5) then
+        if ArtisanGetEnduranceStatus() and GetCharacterCondition(5) then
             ArtisanTimeoutStartTime = 0
         end
     else
@@ -1032,7 +1032,7 @@ while not StopFlag do
             end
             if GetCharacterCondition(5) then
                 yield("/craftinglog")
-                yield("/wait 1")
+                yield("/wait 2")
             end
         end
         State()
