@@ -41,6 +41,8 @@ Fixed some bugs related to /li inn
 3. Vnavmesh
 4. Optional: Lifestream, Teleporter (for hiding in inn)
 
+-- ADD AN ALIAS IN LIFESTREAM WITH THE EXACT SAME NAME AS THE /li COMMAND TO GO TO THE MARKET IF IT GETS STUCK FOR YOU
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 ]]
 --#region Settings
@@ -1052,13 +1054,6 @@ while not StopFlag do
               if IsAddonVisible("RecipeNote") then
                 yield("/pcall RecipeNote true -1")
               end
-            end
-        end
-        if State == CharacterState.scripExchange or State == CharacterState.turnIn then
-            -- Tempfix for Lifestream, 9 steps from grid aeth to market, 4/9 even if we're already at market???
-            if IsAddonVisible("TelepotTown") then
-              LifestreamAbort()
-              yield("/callback TelepotTown false -1")
             end
         end
         State()
