@@ -402,6 +402,9 @@ function Crafting()
      then
         yield("/wait 1")
         return
+    elseif not AtInn and checkAlreadyInHouse() and HomeCommand ~= "" then
+      AtInn = true
+      return
     elseif not AtInn and HomeCommand ~= "" then
         yield(HomeCommand)
         while LifestreamIsBusy() do
@@ -413,12 +416,14 @@ function Crafting()
     local slots = GetInventoryFreeSlotCount()
     if ArtisanGetEnduranceStatus() then
         if IsNeedRepair() then
-            LogInfo("[OrangeCrafters] Setting Artisan stop request to true")
-            ArtisanSetStopRequest(true)
+            LogInfo("[OrangeCrafters] Setting Artisan endurance status to false")
+            ArtisanSetEnduranceStatus(false)
             waitForArtisan()
             RepairExtractReduceCheck()
-            LogInfo("[OrangeCrafters] Setting Artisan stop request to false")
-            ArtisanSetStopRequest(false)
+            yield("/wait 1")
+            State = CharacterState.ready
+            LogInfo("[OrangeCrafters] State Change: Ready")
+
         end
         return
     elseif slots == nil then
@@ -478,6 +483,22 @@ function waitForArtisan()
     end
 end
 
+function checkAlreadyInHouse()
+    yield("/target Summoning Bell")
+    yield("/wait 1")
+    target1 = GetTargetName()
+
+    yield("/target " .. Repair_Npc_Name)
+    yield("/wait 1")
+    target2 = GetTargetName()
+
+    if target1 == "Summoning Bell" and target2 == Repair_Npc_Name then
+      return true
+    else
+      return false
+    end
+end
+
 function GoToHubCity()
     if not IsPlayerAvailable() then
         yield("/wait 1")
@@ -525,14 +546,9 @@ function TurnIn()
                         10)
      then
         if not LifestreamIsBusy() then
-            LogInfo("[OrangeCrafters] /li " .. SelectedHubCity.aethernet.aethernetName)
+            LogInfo("[OrangeCrafters] TurnIn /li " .. SelectedHubCity.aethernet.aethernetName)
             yield("/li " .. SelectedHubCity.aethernet.aethernetName)
-            -- Tempfix for Lifestream, 9 steps from grid aeth to market, 4/9 even if we're already at market???
             yield("/wait 4")
-            if IsAddonVisible("TelepotTown") then
-                LifestreamAbort()
-                yield("/callback TelepotTown false -1")
-            end
         end
     elseif IsAddonVisible("TelepotTown") then
         LogInfo("[OrangeCrafters] TelepotTown open")
@@ -621,7 +637,9 @@ function ScripExchange()
                         10)
      then
         if not LifestreamIsBusy() then
+            LogInfo("[OrangeCrafters] ScripExchange /li " .. SelectedHubCity.aethernet.aethernetName)
             yield("/li " .. SelectedHubCity.aethernet.aethernetName)
+            yield("/wait 4")
         end
         yield("/wait 3")
     elseif IsAddonVisible("TelepotTown") then
@@ -709,7 +727,7 @@ function ProcessRetainers()
             not LogInfo("[OrangeCrafters] is in hub city zone?") and not IsInZone(SelectedHubCity.zoneId) and
                 (not SelectedHubCity.scripExchange.requiresAethernet or
                     (SelectedHubCity.scripExchange.requiresAethernet and
-                        not IsInZone(SelectedHubCity.aethernet.aethernetZoneId)))
+                        not IsInZone(SelectedHubCity.aethernet.aethernetZoneId)) or not checkAlreadyInHouse())
          then
             TeleportTo(SelectedHubCity.aetheryte)
         elseif
@@ -1031,8 +1049,16 @@ while not StopFlag do
                 yield("/wait 1")
             end
             if GetCharacterCondition(5) then
-                yield("/craftinglog")
-                yield("/wait 2")
+              if IsAddonVisible("RecipeNote") then
+                yield("/pcall RecipeNote true -1")
+              end
+            end
+        end
+        if State == CharacterState.scripExchange or State == CharacterState.turnIn then
+            -- Tempfix for Lifestream, 9 steps from grid aeth to market, 4/9 even if we're already at market???
+            if IsAddonVisible("TelepotTown") then
+              LifestreamAbort()
+              yield("/callback TelepotTown false -1")
             end
         end
         State()
