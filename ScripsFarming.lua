@@ -724,10 +724,10 @@ function ProcessRetainers()
                 end
             end
         elseif
-            not LogInfo("[OrangeCrafters] is in hub city zone?") and not IsInZone(SelectedHubCity.zoneId) and
+            not LogInfo("[OrangeCrafters] is in hub city zone?") and not IsInZone(SelectedHubCity.zoneId) and not checkAlreadyInHouse() and
                 (not SelectedHubCity.scripExchange.requiresAethernet or
                     (SelectedHubCity.scripExchange.requiresAethernet and
-                        not IsInZone(SelectedHubCity.aethernet.aethernetZoneId)) or not checkAlreadyInHouse())
+                        not IsInZone(SelectedHubCity.aethernet.aethernetZoneId)))
          then
             TeleportTo(SelectedHubCity.aetheryte)
         elseif
