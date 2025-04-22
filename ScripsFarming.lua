@@ -486,6 +486,9 @@ function waitForArtisan()
 end
 
 function checkAlreadyInHouse()
+    if (GetCharacterCondition(CharacterCondition.occupiedSummoningBell)) then
+        return true
+    end
     yield("/target Summoning Bell")
     yield("/wait 1")
     target1 = GetTargetName()
