@@ -61,6 +61,7 @@ HomeCommand = "/li Home" --Command you use if you want to hide somewhere. Leave 
 HubCity = "Gridania" --Options:Limsa/Gridania/Ul'dah/Solution Nine. Where to turn in the scrips and access retainer bell
 
 Potion = "" -- WARNING: This will overwrite any crafter's pots you have.
+Food = "Rroneek Steak <hq>"
 
 Retainers = true
 Retainers_Amount = 4 -- Amount of retainers = potention slots to keep free in inventory before processing retainers, avoids getting stuck waiting for retainers to finish
@@ -821,7 +822,16 @@ function PotionCheck()
     --pot usage
     if not HasStatusId(49) and Potion ~= "" then
         yield("/item " .. Potion)
+        yield("/wait 2")
     end
+end
+
+function FoodCheck()
+  --food usage
+  if not HasStatus("Well Fed") and Food ~= "" then
+      yield("/item " .. Food)
+      yield("/wait 2")
+  end
 end
 
 function IsNeedRepair()
@@ -921,6 +931,7 @@ end
 
 function Ready()
     PotionCheck()
+    FoodCheck()
 
     if not IsPlayerAvailable() then
         -- do nothing
