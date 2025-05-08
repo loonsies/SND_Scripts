@@ -1,7 +1,8 @@
 maxAttempts = 10
-target = "<target>" -- Replace with the name of the target you want to ride pillion with
+target = "" -- Replace with the name of the target you want to ride pillion with
 targetId = -1
-followAfterRiding = true
+stopBMRAI = true -- Set to true if you want to temporarily disable BMR AI for pathfinding
+followAfterRiding = true -- Set to true if you want to follow the target after riding pillion using BMR
 
 if (GetCharacterCondition(10)) then
   yield("/echo You are already riding pillion.")
@@ -48,6 +49,10 @@ end
 
 if (GetDistanceToPartyMember(targetId) >= 5) then
   yield("/echo Target too far, moving closer...")
+  if (stopBMRAI) then
+    yield("/echo Stopping BMR AI for pathfinding.")
+    yield("/bmrai off")
+  end
   PathfindAndMoveTo(GetPartyMemberRawXPos(targetId), GetPartyMemberRawYPos(targetId), GetPartyMemberRawZPos(targetId))
   yield("/wait 1")
   while (IsMoving() or PathIsRunning()) do
@@ -79,6 +84,7 @@ end
 if (GetCharacterCondition(10)) then
   yield("/p vroom :3 <se.3>")
   if (followAfterRiding) then
+    yield("/echo Enabling BMR AI to follow " .. target .. " after riding pillion.")
     yield("/bmrai follow " .. target)
   end
   return
