@@ -4,6 +4,31 @@ targetId = -1
 stopBMRAI = true -- Set to true if you want to temporarily disable BMR AI for pathfinding
 followAfterRiding = true -- Set to true if you want to follow the target after riding pillion using BMR
 
+annoyingSentences = {
+  "vroom :3 <se.2>",
+  "let's ride d8] <se.14>",
+  "why is the back seat sticky? <se.6>",
+  "turn on AC pls <se.14>",
+  "let me put some tune on da radio 8) <se.14>",
+  "hope you don't mind my legs on ur lap <se.16>",
+  "I can see my house from here <se.14>",
+  "fuck speed limit >:3 <se.6>",
+  "can we stop to get an icecrem :33c <se.14> <se.14>",
+  "oops, I thought this was my Uber >:oc <se.14>",
+  "are we there yet? x100 <se.2> <se.2> <se.2>",
+  "what does this button do? >:3 <se.14>",
+  "my mom said I shouldn’t ride with strangers :c <se.11>",
+  "hehehe zoomies time :3 <se.15>",
+  "I’m the mount now. jk jk unless? :3 <se.14>",
+  "just two beans on wheels~ <se.14>",
+  "hope you drive better than you tank....... <se.14>",
+  "do I tip at the end? :3 <se.16>",
+  "no idea where we’re going, but I’m in 8)) <se.14>",
+  "riding in silence? awkward :3 <se.16>",
+  "if we die, it’s your fault :3 <se.6>",
+}
+sentenceId = math.random(1, #annoyingSentences)
+
 if (GetCharacterCondition(10)) then
   yield("/echo You are already riding pillion.")
   return
@@ -82,7 +107,7 @@ while not GetCharacterCondition(10) do
 end
 
 if (GetCharacterCondition(10)) then
-  yield("/p vroom :3 <se.3>")
+  yield("/p " .. annoyingSentences[sentenceId])
   if (followAfterRiding) then
     yield("/echo Enabling BMR AI to follow " .. target .. " after riding pillion.")
     yield("/bmrai follow " .. target)
