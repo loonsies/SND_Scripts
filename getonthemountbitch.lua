@@ -51,6 +51,26 @@ for i = 0, 7 do
   end
 end
 
+pathfindingNeeded = false
+if (GetDistanceToPartyMember(targetId) >= 5) then
+  yield("/echo Target too far, moving closer...")
+  pathfindingNeeded = true
+  if (stopBMRAI) then
+    yield("/echo Stopping BMR AI for pathfinding.")
+    yield("/bmrai off")
+  end
+  PathfindAndMoveTo(GetPartyMemberRawXPos(targetId), GetPartyMemberRawYPos(targetId), GetPartyMemberRawZPos(targetId))
+  yield("/wait 1")
+  while (IsMoving() or PathIsRunning() or pathfindingNeeded) do
+    if (GetDistanceToPartyMember(targetId) < 5) then
+      PathStop()
+      yield("/echo Close enough to ride pillion. Aborting movement.")
+      break
+    end
+    yield("/wait 0.05")
+  end
+end
+
 attempts = 1
 while (not HasTarget() or GetTargetName() ~= target) do
   if (attempts > maxAttempts) then
@@ -70,24 +90,6 @@ while (not HasTarget() or GetTargetName() ~= target) do
     yield("/wait 1")
   end
   attempts = attempts + 1
-end
-
-if (GetDistanceToPartyMember(targetId) >= 5) then
-  yield("/echo Target too far, moving closer...")
-  if (stopBMRAI) then
-    yield("/echo Stopping BMR AI for pathfinding.")
-    yield("/bmrai off")
-  end
-  PathfindAndMoveTo(GetPartyMemberRawXPos(targetId), GetPartyMemberRawYPos(targetId), GetPartyMemberRawZPos(targetId))
-  yield("/wait 1")
-  while (IsMoving() or PathIsRunning()) do
-    if (GetDistanceToPartyMember(targetId) < 5) then
-      PathStop()
-      yield("/echo Close enough to ride pillion. Aborting movement.")
-      break
-    end
-    yield("/wait 0.05")
-  end
 end
 
 attempts = 1
