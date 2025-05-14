@@ -62,12 +62,6 @@ else
 end
 
 while (true) do
-  if (useMGPBoost and not HasStatus("Gold Saucer VIP Card")) then
-    yield("/echo Using MGP Boost.")
-    yield("/item " .. "Gold Saucer VIP Card")
-    yield("/wait 2")
-  end
-
   if (ARRetainersWaitingToBeProcessed() == true and stopNeeded == false) then
     yield("/echo Retainers are waiting to be processed. stopNeeded set to true.")
     stopNeeded = true
@@ -85,6 +79,14 @@ while (true) do
 
   if (HasTarget() and GetTargetName() == target and stopNeeded == false) then
     if (not GetCharacterCondition(CharacterCondition.occupiedInQuestEvent)) then
+      if (useMGPBoost and not HasStatus("Gold Saucer VIP Card")) then
+        yield("/echo Using MGP Boost.")
+        yield("/item " .. "Gold Saucer VIP Card")
+        while (not HasStatus("Gold Saucer VIP Card")) do
+          yield("/echo Waiting for MGP Boost...")
+          yield("/wait 2")
+        end
+      end
       yield("/interact")
       yield("/wait 0.5")
     end
